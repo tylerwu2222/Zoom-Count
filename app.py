@@ -17,7 +17,7 @@ import atexit
 from flask import Flask, render_template, url_for, request, redirect, flash,\
     get_flashed_messages, session, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, Float, String, DateTime, Interval, select, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, DateTime, Interval, select, ForeignKey, Date, cast
 from sqlalchemy.orm import relationship
 import sqlite3
 # np, pd
@@ -75,20 +75,21 @@ class Events(db.Model):
     ptcpt_pct = db.Column(db.Float(),nullable=False)
     avg_ptcpt_pct = db.Column(db.Float(),nullable=False)
     time_created = db.Column(db.DateTime, default=datetime.utcnow)
+    date_created = db.Column(db.Date, default=datetime.today)
 
 # main fn
 
 # configure directory
 filename = 'static/images/curr_part.png'
 # os.chdir(dname) # change dir to this file dir
-def get_num(class_size=0):
+def get_num(class_size=0,class_id=0):
     '''
     get number of participants in zoom
     '''
     print("current time: ", time.strftime("%H:%M:%S", time.localtime(time.time())))
     try:
         gn_start_time = datetime.now()
-        loc = auto.locateOnScreen('static/images/parts.png') # left, top, width, height
+        loc = auto.locateOnScreen('static/images/parts.png')#,confidence=0.5) # left, top, width, height
         loc = list(loc)
         # print('Participants found')
         # increase width and height to incude number of participants and increase res for tesseract
@@ -112,7 +113,7 @@ def get_num(class_size=0):
         avg_ptcpt_pct = ptcpt_pct
 
         # ideally want to pass in as batch
-        new_event = Events(ptcpt_num=ptcpt_num, ptcpt_pct=ptcpt_pct, avg_ptcpt_pct=avg_ptcpt_pct)
+        new_event = Events(uid=session['uid'], class_id=class_id, ptcpt_num=ptcpt_num, ptcpt_pct=ptcpt_pct, avg_ptcpt_pct=avg_ptcpt_pct)
         db.session.add(new_event)
         db.session.commit()
 
@@ -125,8 +126,8 @@ def get_num(class_size=0):
 # main page
 @app.route('/',methods=['POST','GET'])
 def index():
-    global track_time_start
-    track_time_start = time.time()
+    # global track_time_start
+    # track_time_start = time.time()
     im = ["instr_slide1.png","instr_slide2.png","instr_slide3.png","instr_slide4.png"]
     tut_im = ["/static/images/" + i for i in im]
     # print(tut_im)
@@ -145,32 +146,34 @@ def index():
     else:
         classes = False
         session['logged_in'] = False
-        uid = 0
+        uid = 999
         username = 'notloggedin'
     try:
         if request.method == "POST":
             '''
             get num every 60 seconds until the desired time is reached
             '''
-            track_time_start = time.time()
+            # track_time_start = time.time()
             if session['logged_in'] == True:
                 # get class name from select
                 trk_class = request.form.get("class_select")
                 # and class size from db
-                r = db.engine.execute('select class_size from classes where uid=? and class_name=?',uid,trk_class)
+                r = db.engine.execute('select class_size, id from classes where uid=? and class_name=?',uid,trk_class)
                 for i in r:
                     class_size = i.class_size
+                    class_id = i.id
                     
             else:
                 # get class name from text input
                 trk_class = request.form.get("class_text")
                 # and class size from text input
                 class_size = request.form.get("class_size")
+                class_id = 999
             # print('class_size',class_size)
             trk_until_h = request.form.get("track_until_hrs")
             trk_until_m = request.form.get("track_until_mins")
             trk_length = int(trk_until_h) * 3600 + int(trk_until_m) * 60
-            
+            print(uid, trk_class)
             # define globals for scheduler
             global first_secs
             first_secs = 300 # first 5 min
@@ -181,8 +184,14 @@ def index():
             global end_time
             join_time = start_time + timedelta(seconds=first_secs)
             end_time = start_time + timedelta(seconds=trk_length)
+            # end_time = start_time + timedelta(seconds=2)
             leave_time = end_time - timedelta(seconds=last_secs)
             print("start time: ",start_time.strftime("%I:%M:%S %p"), "end time: ", end_time.strftime("%I:%M:%S %p"))
+            if end_time < join_time:
+                join_time = end_time
+            if end_time < leave_time:
+                leave_time = end_time
+            print("join time: ",join_time.strftime("%I:%M:%S %p"), "leave time: ", leave_time.strftime("%I:%M:%S %p"))
             short_int = 2
             long_int = 30
             if trk_length <= 600: # for short classes, just check on short int.
@@ -190,7 +199,7 @@ def index():
 
             # run tracking
             while datetime.now() < join_time:
-                run_time = get_num(class_size).total_seconds()
+                run_time = get_num(class_size,class_id).total_seconds()
                 diff = short_int - run_time
                 if diff < 0:
                     time.sleep(short_int+diff % short_int) # run at next int if skipped one
@@ -198,7 +207,7 @@ def index():
                     time.sleep(diff)
                 # run_get_num(short_int,class_size)
             while datetime.now() < leave_time:
-                run_time = get_num(class_size).total_seconds()
+                run_time = get_num(class_size,class_id).total_seconds()
                 diff = long_int - run_time
                 if diff < 0:
                     time.sleep(long_int+diff % long_int) # run at immediate next int
@@ -206,21 +215,28 @@ def index():
                     time.sleep(diff)
                 # run_get_num(long_int,class_size)
             while datetime.now() < end_time:
-                run_time = get_num(class_size).total_seconds()
+                run_time = get_num(class_size,class_id).total_seconds()
                 diff = short_int - run_time
                 if diff < 0:
                     time.sleep(short_int+diff % short_int) # run at immediate next int
                 else:
                     time.sleep(diff)
             # finally recalculate avg percent participation for session 
-            r = db.engine.execute('SELECT uid, class_id, strftime("%D-%M-%Y", time_created) AS date, avg(ptcpt_pct) AS avg FROM Events GROUP BY uid, class_id, strftime("%D-%M-%Y", time_created);')
+            # r = db.engine.execute('SELECT uid, class_id, date_created, avg(ptcpt_pct) AS avg FROM Events GROUP BY uid, class_id, date_created;')
+            uid = session['uid']
+            cid = class_id
+            dt_crt = str(datetime.today()).split()[0]
+            # print(uid,cid,type(dt_crt),dt_crt)
+            sql_cmd = f"SELECT uid, class_id, date_created, avg(ptcpt_pct) AS avg FROM Events WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
+            r = db.engine.execute(sql_cmd)
             for i in r:
-                print(i)
-                avg = i['avg']
-                uid = i['uid']
-                cid = i['class_id']
-                date = i['date']
-                u = db.engine.execute(f'UPDATE Events SET avg_ptcpt_pct={avg} WHERE uid={uid} AND class_id={cid} AND date={date};')
+                # print(i)
+                uid = i[0]
+                cid = i[1]
+                date = i[2]
+                avg = i[3]
+                sql_cmd = f"UPDATE Events SET avg_ptcpt_pct={avg} WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
+                u = db.engine.execute(sql_cmd)
             return render_template('index.html', loggedIn = session['logged_in'],classes=classes, tut_list=tut_im,status="Done!")
     except Exception as e:
         return(str(e))
@@ -379,7 +395,7 @@ def checkVisible():
     print("here")
     max_count = 0
     while max_count < 3:
-        if auto.locateOnScreen('static/images/parts.png'): # left, top, width, height
+        if auto.locateOnScreen('static/images/parts.png'):#,confidence=0.5): # left, top, width, height
             print("found")
             return jsonify("found")
         else:
