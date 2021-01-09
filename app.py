@@ -38,6 +38,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 app.config['SECRET_KEY'] = 'soomztudy202022021'
 db = SQLAlchemy(app=app) # create database
 
+# for heroku
+os.environ['DISPLAY'] = ':0'
+
 # define database tables
 class Users(db.Model):
     __tablename__ = 'users'
