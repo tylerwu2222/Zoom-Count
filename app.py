@@ -88,7 +88,7 @@ def get_num(class_size=0):
     print("current time: ", time.strftime("%H:%M:%S", time.localtime(time.time())))
     try:
         gn_start_time = datetime.now()
-        loc = auto.locateOnScreen('static/images/part3.png') # left, top, width, height
+        loc = auto.locateOnScreen('static/images/parts.png') # left, top, width, height
         loc = list(loc)
         # print('Participants found')
         # increase width and height to incude number of participants and increase res for tesseract
@@ -121,16 +121,6 @@ def get_num(class_size=0):
         print("Participants not found")
     # print("fn took ", time.time() - start_time, " to run")
     return datetime.now() - gn_start_time
-
-def run_get_num(interval = 2,class_size=80):
-    run_time = get_num(class_size).total_seconds()
-    print(run_time)
-    diff = interval -  run_time
-    print(diff)
-    if diff < 0:
-        time.sleep(interval+diff) # run at next int if skipped one
-    else:
-        time.sleep(diff)
 
 # main page
 @app.route('/',methods=['POST','GET'])
@@ -183,9 +173,9 @@ def index():
             
             # define globals for scheduler
             global first_secs
-            first_secs = 60
+            first_secs = 300 # first 5 min
             global last_secs
-            last_secs = 60
+            last_secs = 300
             global start_time
             start_time = datetime.now()
             global end_time
@@ -195,8 +185,10 @@ def index():
             print("start time: ",start_time.strftime("%I:%M:%S %p"), "end time: ", end_time.strftime("%I:%M:%S %p"))
             short_int = 2
             long_int = 30
-            if trk_length <= 2: # for short classes, just check on short int.
+            if trk_length <= 600: # for short classes, just check on short int.
                 long_int = short_int
+
+            # run tracking
             while datetime.now() < join_time:
                 run_time = get_num(class_size).total_seconds()
                 diff = short_int - run_time
@@ -220,6 +212,15 @@ def index():
                     time.sleep(short_int+diff % short_int) # run at immediate next int
                 else:
                     time.sleep(diff)
+            # finally recalculate avg percent participation for session 
+            r = db.engine.execute('SELECT uid, class_id, strftime("%D-%M-%Y", time_created) AS date, avg(ptcpt_pct) AS avg FROM Events GROUP BY uid, class_id, strftime("%D-%M-%Y", time_created);')
+            for i in r:
+                print(i)
+                avg = i['avg']
+                uid = i['uid']
+                cid = i['class_id']
+                date = i['date']
+                u = db.engine.execute(f'UPDATE Events SET avg_ptcpt_pct={avg} WHERE uid={uid} AND class_id={cid} AND date={date};')
             return render_template('index.html', loggedIn = session['logged_in'],classes=classes, tut_list=tut_im,status="Done!")
     except Exception as e:
         return(str(e))
@@ -378,7 +379,7 @@ def checkVisible():
     print("here")
     max_count = 0
     while max_count < 3:
-        if auto.locateOnScreen('static/images/part3.png'): # left, top, width, height
+        if auto.locateOnScreen('static/images/parts.png'): # left, top, width, height
             print("found")
             return jsonify("found")
         else:
