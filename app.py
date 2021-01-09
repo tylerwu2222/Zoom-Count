@@ -1,5 +1,4 @@
 # misc
-import os
 import sys
 import itertools
 import math
@@ -76,8 +75,7 @@ class Events(db.Model):
 # main fn
 
 # configure directory
-filename = 'curr_part.png'
-filename = os.path.join(os.getcwd(),'static\images',filename)
+filename = 'static/images/curr_part.png'
 # os.chdir(dname) # change dir to this file dir
 def get_num(class_size=0):
     '''
