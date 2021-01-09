@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block head %} 
+<title>Zoom Count</title>
+{% endblock %}
+
+{% block body %}
+<script src="/static/js/edit_classes.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<div class="contatiner">
+    <h3>Edit Classes</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading"><b> Table </b> </div>
+        <div class="panel-body">
+          <div class="class_tbl_div">
+            <form method="POST" action = "/edit_classes/">
+              <table class="table table-hover" id="class_tbl">
+                <thead>
+                  <tr>
+                  <th scope="col">Class Name</th>
+                  <th scope="col">Class Size</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">End Time</th>
+                  <th scope="col">Class Length (Hrs)</th>
+                  <th scope="col">Subject Area (optional)</th>
+                  <th scope="col">PER* (optional)</th>
+                  <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                {% for cls in classes %}
+                <tr>
+                  <td><input name="classNames[]" type="text" value='{{ cls.class_name }}' required/></td>
+                  <td><input name="classSizes[]" type="number" value='{{ cls.class_size }}' step="1" required/></td>
+                  <td><input name="startTimes[]" type="time" value='{{ cls.class_start|strftime }}' id="start_time" step=300 required></td>
+                  <td><input name="endTimes[]" type="time" value='{{ cls.class_end|strftime }}' id="end_time" step=300 required></td>
+                  <td><input name="classLengths[]" type="number" value='{{ cls.class_length }}' id="class_length" min="0.25" max="10" step="0.25" required></td>
+                  <td><input name="subjects[]" type="text" value='{{ cls.subject_area }}' /></td>
+                  <td><input name="PERs[]" type="number" value='{{ cls.prof }}' min="1" max="10" step="1"/></td>
+                  <td><button type="button" class="close" aria-label="Close" style="border:none; background:none; color:rgb(255, 0, 76); font-weight:bold;" onclick="deleteRow(this)"><span aria-hidden="true">&times;</span></button></td>
+                </tr>
+                  {% else %}
+                <tr>
+                  <td><input name="classNames[]" type="text" placholder="Sample Class" required/></td>
+                  <td><input name="classSizes[]" type="number" value="100" step="1" required/></td>
+                  <td><input name="startTimes[]" type="time" value="10:00" id="start_time" step=300 required></td>
+                  <td><input name="endTimes[]" type="time" value="11:00" id="end_time" step=300 required></td>
+                  <td><input name="classLengths[]" type="number" value='1' id="class_length" min="0.25" max="10" step="0.25" required></td>
+                  <td><input name="subjects[]" type="text" placeholder="Subject"/></td>
+                  <td><input name="PERs[]" type="number" value="6" min="1" max="10" step="1"/></td>
+                  <td><button type="button" class="close" aria-label="Close" style="border:none; background:none; color:rgb(255, 0, 76); font-weight:bold;" onclick="deleteRow(this)"><span aria-hidden="true">&times;</span></button></td>
+                </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              <input type="submit" value="Save Changes" class="btn btn-primary"  id="saveChanges" style="float:right"/>
+            </form>
+          </div>
+        </div>
+    </div>
+
+    <!--add class-->
+    <button type="button" value="NewClass" class="btn btn-outline-primary btn-sm" id="addTableRow" onclick="addRow()">Add Class</button>
+    <!--save changes-->
+    <br><br>
+    <p style="float:right; font-size: smaller;"><b>*Professor Engagement Rating</b><br>Your subjective rating of the professor from 1-10<br>(1 = lowest engagement, 10 = highest engagement)</p>
+</div>
+{% endblock %}

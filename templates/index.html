@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block head %} 
+<title>Zoom Count</title>
+{% endblock %}
+
+{% block body %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+
+<div class="content">
+    <h3>What is this?</h3>
+    <p>Zoom Count is a Web Application that counts the number of participants 
+        in your zoom meeting every minute, stores this data, and creates cool interactive graphs 
+        that let you compare participation trends of your various classes.</p>
+    <h3 style="float: left; margin-right: 20px;">How to use </h3>
+    <!-- <button id="toggle_instr_btn" class="btn-outline-primary btn-sm" style="float: left;">Hide</button><br> -->
+    <!-- <div id="hi_im_tired" style="display:block;"> -->
+    <div id="instr_carousel" class="carousel slide" data-ride="carousel" data-interval="7000">
+        <div class="carousel-inner">
+            {% for tut in tut_list %}
+                {% if tut == "/static/images/instr_slide1.png" %}
+                    <div class="carousel-item active">
+                {% else %}
+                    <div class="carousel-item">
+                {% endif %}
+                        <img class="d-block w-100" src="{{ tut }}" alt="{{ tut }}" style="max-width: 100%;">
+                        <div class="carousel-caption d-none d-md-block">
+                        </div>
+                    </div>
+            {% endfor %}
+        </div>
+        <a class="carousel-control-prev" href="#instr_carousel" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only"></span>
+        </a>
+        <a class="carousel-control-next" href="#instr_carousel" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only"></span>
+        </a>
+    </div>
+    <!-- </div> -->
+    <div class="form-group">
+        <form id="post_form" method = 'POST' action = "/">
+        {% if classes %}
+            <div class="row justify-content-start" id="track_row">
+                <div class="col-sm-auto">
+                    <label for="class_select">Choose class to track:</label>
+                </div>
+                <div class="col-sm-auto">
+                    <select id="class_select" class="custom-select-sm trk_class" name="class_select">
+                        {% for class in classes %}
+                        <option value="{{ class }}">{{ class }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% else %}
+            <div class="row justify-content-start" id="track_row">
+                <div class="col-sm-auto">
+                    <label for="class_text">Enter class name:</label>
+                </div>
+                <div class="col-sm-auto">
+                    <input type="text" id="class_text" class="trk_class" name="class_text" placeholder="Class Name">
+                </div> 
+            </div>
+            <div class="row justify-content-start">
+                <div class="col-sm-auto">
+                    <label for="class_text">Enter class size:</label>
+                </div>
+                <div class="col-sm-auto">
+                    <input type="number" id="class_size" name="class_size" min="1" max="1000" step="1" value="80" size="2">
+                </div>
+            </div>
+        {% endif %}
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <label for="track_until_hrs">Tracking Duration:  Hrs</label>
+            </div>
+            <div class="col-sm-auto">
+                <input type="number" id="track_until_hrs" name="track_until_hrs" min="0" max="6" step="1" value="0" size="1">  
+            </div>
+            <div class="col-sm-auto">
+                <label for="track_until_mins">Mins</label>
+            </div>
+            <div class="col-sm-auto">
+                <input type="number" id="track_until_mins" name="track_until_mins" min="0" max="59" step="1" value="50" size="2">  
+            </div>
+        </div>
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <label for="a_button">Check if the number of particpants is visible: </label>
+            </div>
+            <div class="col-sm-auto">
+                <button class="a_button" id="check_button">
+                    Check 
+                </button>
+            </div>
+        </div>
+        {% if status == "Not" %}
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <button class="a_button" id="track_button">Start Tracking</button>
+            </div>
+        </div>
+        {% else %}
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <button class="a_button" id="track_button">Finished!</button>
+            </div>
+        </div>
+        {% endif %}
+        </form>
+    </div>
+</div>
+<script src="/static/js/index.js"></script>
+{% endblock %}

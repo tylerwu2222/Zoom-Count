@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="navbar-header fixed-top container-fluid">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link" href="/view_graphs/">All Graphs</a>
+        </li>
+        {% if loggedIn == true %}
+        <li class="nav-item">
+            <a class="nav-link" href="/my_graphs/">My Graphs</a>
+        </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link disabled" href="/">My Graphs</a>
+        </li>
+        {% endif %}
+    </ul>
+    <p><b>Coming soon ;)</b></p>
+</div>
+{% endblock %}

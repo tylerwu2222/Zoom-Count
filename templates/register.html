@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block head %}
+<title>Zoom Count</title>
+{% endblock %}
+
+{% block body %}
+<div class="contatiner content">
+    <h3>Register</h3>
+    <br>
+    {% from "_formhelpers.html" import render_field %}
+    <form method=post action="/register/">
+        <dl>
+            {{render_field(form.username)}}
+            {{render_field(form.password)}}
+            {{render_field(form.confirm)}}
+            {{render_field(form.timezone)}}
+            {{render_field(form.university)}}
+        </dl>
+        <p><input type=submit value=Register></p>
+    </form>
+    {% if error %}
+        <p class="error"><strong>Error: </strong>{{error}}</p>
+    {% endif %}
+
+</div>
+{% endblock %}
