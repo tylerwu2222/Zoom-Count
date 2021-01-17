@@ -18,5 +18,5 @@ __Using the App__
 3) Once on the site, create an account, and follow the instructions listed on the home page.
 4) Enjoy!
 
-If you'd like to try tracking your zoom data and would like to send it to me, or just have any questions about the app, email me at [tylerwu2222@g.ucla.edu](mailto:tylerwu2222@g.ucla.edu).
-For the foreseeable future, this project is discontinued. 
+If you'd like to try tracking your zoom data and would like to send it to me, or just have any questions about the app, email me at [tylerwu2222@g.ucla.edu](mailto:tylerwu2222@g.ucla.edu).  
+But for the foreseeable future, this project is discontinued. 
