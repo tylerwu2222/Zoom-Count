@@ -13,10 +13,10 @@ __Set up__
   `Ctrl+z` (to exit python)
   
 __Using the App__
-4) Run app.py
-5) Go to the localhost link listed in the console (should be something like: Running on http://127.0.0.1:5000/ (Press CTRL+C to quit))
-6) Once on the site, create an account, and follow the instructions listed on the home page.
-7) Enjoy!
+1) Run app.py
+2) Go to the localhost link listed in the console (should be something like: Running on http://127.0.0.1:5000/ (Press CTRL+C to quit))
+3) Once on the site, create an account, and follow the instructions listed on the home page.
+4) Enjoy!
 
 If you'd like to try tracking your zoom data and would like to send it to me, or just have any questions about the app, email me at [tylerwu2222@g.ucla.edu](mailto:tylerwu2222@g.ucla.edu).
 For the foreseeable future, this project is discontinued. 
