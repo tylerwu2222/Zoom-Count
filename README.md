@@ -7,7 +7,7 @@ __Set up__
 2) Go to the local directory
 2) Create a virtual env (optional, but recommended); install packages from requirements.txt
 3) Create the main.db file from app:
-  a) in a console, type: `py` (to run python)
+  1) in a console, type: `py` (to run python)
   `from app import db`
   `db.create_all()`
   `Ctrl+z` (to exit python)
