@@ -1,6 +1,22 @@
 # ZoomCount
 Unfortunately, I learned from deploying this app that PyAutoGui does not work on a web app, since it runs on the server.  
-However, for those still interested in trying this app out, the app should work fine on the localhost.
-Also, the feature I would have hoped to use from Zoom's API required a business level account, which cannot be guaranteed for any given user.  
+However, for those still interested in trying this app out, the app should work fine on the localhost following these steps:
 
-So for the foreseeable future, this project is discontinued.  
+__Set up__
+1) Clone the repository
+2) Go to the local directory
+2) Create a virtual env (optional, but recommended); install packages from requirements.txt
+3) Create the main.db file from app:
+  a) in a console, type: `py` (to run python)
+  `from app import db`
+  `db.create_all()`
+  `Ctrl+z` (to exit python)
+  
+__Using the App__
+4) Run app.py
+5) Go to the localhost link listed in the console (should be something like: Running on http://127.0.0.1:5000/ (Press CTRL+C to quit))
+6) Once on the site, create an account, and follow the instructions listed on the home page.
+7) Enjoy!
+
+If you'd like to try tracking your zoom data and would like to send it to me, or just have any questions about the app, email me at mailto:tylerwu2222@g.ucla.edu
+For the foreseeable future, this project is discontinued. 
