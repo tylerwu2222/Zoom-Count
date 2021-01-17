@@ -6,11 +6,11 @@ __Set up__
 1) Clone the repository
 2) Go to the local directory
 2) Create a virtual env (optional, but recommended); install packages from requirements.txt
-3) Create the main.db file from app:
-  - in a console, type: `py` (to run python)
-  `from app import db`
-  `db.create_all()`
-  `Ctrl+z` (to exit python)
+3) Create the main.db file from app:  
+  a) in a console, type: `py` (to run python)  
+  `from app import db`  
+  `db.create_all()`  
+  `Ctrl+z` (to exit python)  
   
 __Using the App__
 1) Run app.py
