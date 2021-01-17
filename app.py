@@ -17,7 +17,8 @@ import atexit
 from flask import Flask, render_template, url_for, request, redirect, flash,\
     get_flashed_messages, session, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Column, Integer, Float, String, DateTime, Interval, select, ForeignKey, Date, cast
+from sqlalchemy import Column, Integer, Float, String, DateTime, Interval, select,\
+    ForeignKey, Date, cast, Boolean
 from sqlalchemy.orm import relationship
 import sqlite3
 # np, pd
@@ -74,6 +75,10 @@ class Events(db.Model):
     ptcpt_num = db.Column(db.Integer(),nullable=False)
     ptcpt_pct = db.Column(db.Float(),nullable=False)
     avg_ptcpt_pct = db.Column(db.Float(),nullable=False)
+    max_ptcpt_pct = db.Column(db.Float(),nullable=False)
+    pre_MT = db.Column(db.Boolean(),nullable=False)
+    post_MT = db.Column(db.Boolean(),nullable=False)
+    pre_final = db.Column(db.Boolean(),nullable=False)
     time_created = db.Column(db.DateTime, default=datetime.utcnow)
     date_created = db.Column(db.Date, default=datetime.today)
 
@@ -111,15 +116,20 @@ def get_num(class_size=0,class_id=0):
         ptcpt_num = int(num_part)
         ptcpt_pct = ptcpt_num/int(class_size)
         avg_ptcpt_pct = ptcpt_pct
-
+        max_ptcpt_pct = ptcpt_pct
+        pre_MT = True if session['pre_MT'] == 'on' else False
+        post_MT = True if session['post_MT'] == 'on' else False
+        pre_final = True if session['pre_final'] == 'on' else False
         # ideally want to pass in as batch
-        new_event = Events(uid=session['uid'], class_id=class_id, ptcpt_num=ptcpt_num, ptcpt_pct=ptcpt_pct, avg_ptcpt_pct=avg_ptcpt_pct)
+        new_event = Events(uid=session['uid'], class_id=class_id, ptcpt_num=ptcpt_num, 
+        ptcpt_pct=ptcpt_pct, avg_ptcpt_pct=avg_ptcpt_pct, max_ptcpt_pct=max_ptcpt_pct,
+        pre_MT=pre_MT,post_MT=post_MT,pre_final=pre_final)
         db.session.add(new_event)
         db.session.commit()
 
     except Exception as e:
-        # print(e)
-        print("Participants not found")
+        print(e)
+        # print("Participants not found")
     # print("fn took ", time.time() - start_time, " to run")
     return datetime.now() - gn_start_time
 
@@ -153,23 +163,23 @@ def index():
             '''
             get num every 60 seconds until the desired time is reached
             '''
-            # track_time_start = time.time()
+            # get class name from select and size from db
             if session['logged_in'] == True:
-                # get class name from select
                 trk_class = request.form.get("class_select")
-                # and class size from db
                 r = db.engine.execute('select class_size, id from classes where uid=? and class_name=?',uid,trk_class)
                 for i in r:
                     class_size = i.class_size
                     class_id = i.id
-                    
+            # get class name and size from select
             else:
-                # get class name from text input
                 trk_class = request.form.get("class_text")
-                # and class size from text input
                 class_size = request.form.get("class_size")
                 class_id = 999
-            # print('class_size',class_size)
+            # other info
+            session['pre_MT'] = request.form.get("pre_MT")
+            session['post_MT'] = request.form.get("post_MT")
+            session['pre_final'] = request.form.get("pre_final")
+            print(True if session['pre_MT'] == 'on' else False)
             trk_until_h = request.form.get("track_until_hrs")
             trk_until_m = request.form.get("track_until_mins")
             trk_length = int(trk_until_h) * 3600 + int(trk_until_m) * 60
@@ -221,21 +231,22 @@ def index():
                     time.sleep(short_int+diff % short_int) # run at immediate next int
                 else:
                     time.sleep(diff)
-            # finally recalculate avg percent participation for session 
+                    
+            # finally recalculate max percent participation for session 
             # r = db.engine.execute('SELECT uid, class_id, date_created, avg(ptcpt_pct) AS avg FROM Events GROUP BY uid, class_id, date_created;')
             uid = session['uid']
             cid = class_id
             dt_crt = str(datetime.today()).split()[0]
-            # print(uid,cid,type(dt_crt),dt_crt)
-            sql_cmd = f"SELECT uid, class_id, date_created, avg(ptcpt_pct) AS avg FROM Events WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
+            sql_cmd = f"SELECT uid, class_id, date_created, MAX(ptct_pct) as max, FROM Events WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
             r = db.engine.execute(sql_cmd)
             for i in r:
                 # print(i)
                 uid = i[0]
                 cid = i[1]
                 date = i[2]
-                avg = i[3]
-                sql_cmd = f"UPDATE Events SET avg_ptcpt_pct={avg} WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
+                max_ptcpt_pct = i[3]
+                # add max ptcpt %
+                sql_cmd = f"UPDATE Events SET max_ptcpt={max_ptcpt_pct} WHERE uid={uid} AND class_id={cid} AND date_created='{dt_crt}'"
                 u = db.engine.execute(sql_cmd)
             return render_template('index.html', loggedIn = session['logged_in'],classes=classes, tut_list=tut_im,status="Done!")
     except Exception as e:

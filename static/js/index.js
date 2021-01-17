@@ -5,7 +5,7 @@ $(document).ready(function(){
         $('#check_button').on('click', function(e) {
             e.preventDefault()
             var y = document.getElementById("check_button")
-            // if(y.innerHTML === "Check"){
+            var z = document.getElementById("ref_img")
             y.innerHTML = '<span class="spinner-border spinner-border-sm" id="check_spinner" role="status"></span> Looking...'
             // }
             $.getJSON('/check_visible/',
@@ -15,9 +15,12 @@ $(document).ready(function(){
                     // hide load icon when found and show check
                     if(status == "found"){
                         y.innerHTML = "Found!"
+                        z.style.display = "none"
                     }
                     else{
                         y.innerHTML = "Not found..."
+                        z.style.display = "block"
+
                     }
             });
         });

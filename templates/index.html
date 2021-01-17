@@ -7,7 +7,6 @@
 {% block body %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-
 <div class="content">
     <h3>What is this?</h3>
     <p>Zoom Count is a Web Application that counts the number of participants 
@@ -88,6 +87,42 @@
             </div>
         </div>
         <div class="row justify-content-start" id="track_row">
+            <p>Is this class...</p>
+        </div>
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <p>Pre-Midterm?</p>
+            </div>
+            <div class="col-sm-auto">
+                <label class="switch">
+                    <input type="checkbox" name="pre_MT">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <p>Post-Midterm?</p>
+            </div>
+            <div class="col-sm-auto">
+                <label class="switch">
+                    <input type="checkbox" name="post_MT">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        <div class="row justify-content-start" id="track_row">
+            <div class="col-sm-auto">
+                <p>Pre-Final?</p>
+            </div>
+            <div class="col-sm-auto">
+                <label class="switch">
+                    <input type="checkbox" name="pre_final">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </div>
+        <div class="row justify-content-start" id="track_row">
             <div class="col-sm-auto">
                 <label for="a_button">Check if the number of particpants is visible: </label>
             </div>
@@ -96,12 +131,16 @@
                     Check 
                 </button>
             </div>
-            <!-- <div class="row justify-content-start" id="track_row"></div>
-                <form action="/">
-                    <input type="file" id="myFile" name="filename">
-                    <input type="submit">
-                </form>
-            </div> -->
+            <div class="row justify-content-start" id="track_row"></div>
+                <div id="ref_img" style="display: none;">
+                    <div class="col-sm-auto">
+                        <p>If the participants tab is visible and the app still can't locate it,<br> 
+                            try taking a screenshot like this:</p>
+                        <img src="{{url_for('static', filename='images/parts_ref.png')}}" style="max-width:100px;"" alt="parts_ref.png" width="500">
+                    </p> and save it as <b>parts.png</b> in <b>static/images/</b></p>
+                    </div>
+                </div>
+            </div>
         </div>
         {% if status == "Not" %}
         <div class="row justify-content-start" id="track_row">
